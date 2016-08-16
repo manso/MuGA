@@ -92,7 +92,7 @@ public class CharStatistics {
 
     public static void main(String[] args) {
         EAsolver solver = new MuGA();
-        solver.startEvolution(true);
+        solver.InitializeEvolution(true);
         CharStatistics demo = new CharStatistics();
         demo.createChart(solver, 0);
 

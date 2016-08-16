@@ -168,7 +168,7 @@ public class StatisticsChartSolver {
 
     public static void main(String[] args) {
         EAsolver solver = new MuGA();
-        solver.startEvolution(true);
+        solver.InitializeEvolution(true);
         StatisticsChartSolver demo = new StatisticsChartSolver(solver);
 
         JPanel panel = new JPanel();

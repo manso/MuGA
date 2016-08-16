@@ -184,7 +184,7 @@ public class StatisticsChartSimulation extends StatisticsChartSolver {
         muga.numberOfRun = 10;
         EAsolverArray solver = new EAsolverArray(muga);
 
-        solver.startEvolution(true);
+        solver.InitializeEvolution(true);
 
         StatisticsChartSolver demo = new StatisticsChartSimulation(solver);
 

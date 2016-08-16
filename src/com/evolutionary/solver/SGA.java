@@ -36,7 +36,7 @@ public class SGA extends EAsolver {
     //:::::::::::::::::::::::::::  Copyright(c) M@nso  2016  :::::::::::::::::::
     ///////////////////////////////////////////////////////////////////////////
     @Override
-    public void startEvolution(boolean verbose) {
+    public void InitializeEvolution(boolean verbose) {
         // init random generator
         if (randomSeed == 0) {
             random.setSeed(random.nextLong());

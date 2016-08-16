@@ -54,7 +54,7 @@ public class SetupSolverFrm extends javax.swing.JFrame {
 
     public void initMyComponents(EAsolver s) {
         solver = s;
-        solver.startEvolution(false);
+        solver.InitializeEvolution(false);
         loadSolver(solver);
         txtPathSimulation.setText(MuGASystem.mugaPath);
         setupPop.setPopulation(solver.parents, solver.problem);

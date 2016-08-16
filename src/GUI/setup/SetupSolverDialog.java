@@ -39,7 +39,7 @@ public class SetupSolverDialog extends javax.swing.JDialog {
     public void initMyComponents(EAsolver s) {
         solver = s.getSolverClone();
         solverOriginal = s;
-//        solver.startEvolution(false);
+//        solver.InitializeEvolution(false);
         loadSolver(solver);
         setupPop.setPopulation(solver.parents, solver.problem);
 

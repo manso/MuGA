@@ -88,7 +88,7 @@ public class ExploreSolver extends javax.swing.JFrame {
 
     public void setSolver(EAsolver newSolver) {
         this.setupSolver.setMySolver(newSolver);
-        //setupSolver.getMySolver().startEvolution(false);
+        //setupSolver.getMySolver().InitializeEvolution(false);
         displayPop.setPopulation(setupSolver.getMySolver().parents);
         txtSolver.setText(setupSolver.toString());
         // txtSolver.setText(newSolver.report.getEvolutionString());
@@ -358,7 +358,7 @@ public class ExploreSolver extends javax.swing.JFrame {
 
     private void btStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btStartActionPerformed
         runningSolver.stop();
-        initSolver();
+        initSolver(); // create solver to run
         tpSolver.setSelectedIndex(1); // population
         btRun.setSelected(true);
         runningSolver.start();
@@ -433,13 +433,18 @@ public class ExploreSolver extends javax.swing.JFrame {
     private javax.swing.JTextArea txtSolver;
     // End of variables declaration//GEN-END:variables
 
+    
     private void initSolver() {
+        //load solver from textArea
         EAsolver solver = FileSolver.loadSolver(txtSolver.getText(), ReportSolver.DEFAULT_FILE_NAME);
         int selectedIndex = tpSolver.getSelectedIndex();
-        solver.startEvolution(false);
-        // tpSolver.setSelectedComponent(pnPopulation);
+        //initialize simulation
+        solver.InitializeEvolution(false);
+        //display population
         displayPop.setPopulation(solver.parents);
+        //remove all tabs from GUI
         tpSolver.removeAll();
+        //create new Tabs
         if (solver instanceof EAsolverArray) {
             statsPanel = new StatisticsChartSimulation(solver);
         } else {

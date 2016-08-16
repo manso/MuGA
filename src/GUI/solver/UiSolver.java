@@ -65,6 +65,7 @@ public class UiSolver implements Runnable {
         }
     }
 
+    @Override
     public String toString() {
         return mySolver.toString();
     }

@@ -114,7 +114,7 @@ public class EAsolverArray extends EAsolver {
      * @param verbose
      */
     public void solve(boolean verbose) {
-        startEvolution(verbose); // reset solvers
+        InitializeEvolution(verbose); // reset solvers
         //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         //running solvers
         ThreadRunSolver[] thr = new ThreadRunSolver[arrayOfSolvers.length];
@@ -186,7 +186,7 @@ public class EAsolverArray extends EAsolver {
      *
      * @param verbose
      */
-    public void startEvolution(boolean verbose) {
+    public void InitializeEvolution(boolean verbose) {
         // init random generator
         if (template.randomSeed == 0) {
             template.random.setSeed(template.random.nextLong());
@@ -202,7 +202,7 @@ public class EAsolverArray extends EAsolver {
         parents.evaluate();
 
         for (EAsolver s : arrayOfSolvers) {
-            s.startEvolution(verbose);
+            s.InitializeEvolution(verbose);
         }
         //start statistics
         report.startStats(this, verbose);

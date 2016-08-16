@@ -141,7 +141,7 @@ public class StatisticsChartExperiment extends StatisticsChartSolver {
         EAsolver template = new MuGA();
         template.numberOfRun = 10;
         EAsolverArray solver = new EAsolverArray(template);
-        solver.startEvolution(true);
+        solver.InitializeEvolution(true);
         StatisticsChartSolver demo = new StatisticsChartExperiment(solver);
 
         JPanel panel = new JPanel();

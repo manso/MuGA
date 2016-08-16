@@ -68,7 +68,11 @@ public abstract class EAsolver extends Genetic {
     public Collection<Solution> hallOfFame = new ArrayList<>(); // hall of fame
     public ReportSolver report = new ReportSolver();  // report of evolution
 
-    public void startEvolution(boolean verbose) {
+    /**
+     * initialize all the components of the evolution
+     * @param verbose display messages in console ?
+     */
+    public void InitializeEvolution(boolean verbose) {
         // init random generator
         if (randomSeed == 0) {
             random.setSeed(random.nextLong());
@@ -92,7 +96,7 @@ public abstract class EAsolver extends Genetic {
     }
 
     public void solve(boolean verbose) {
-        startEvolution(verbose);
+        InitializeEvolution(verbose);
         while (!stop.isDone(this)) {
             iterate();
             updateEvolutionStats();
