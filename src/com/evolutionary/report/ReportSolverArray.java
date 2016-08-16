@@ -356,7 +356,7 @@ public class ReportSolverArray extends ReportSolver {
         StatisticElement[] values = evolutionGeneration.get(generation);
         for (int i = 0; i < stats.size(); i++) {
             if (stats.get(i).getClass().equals(FunctionCalls.class)) {
-                return values[i].getMean();
+                return values[i].getMax();
             }
         }
         return 0;

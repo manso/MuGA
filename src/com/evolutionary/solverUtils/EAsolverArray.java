@@ -147,22 +147,26 @@ public class EAsolverArray extends EAsolver {
     public void iterate() {
         this.numEvaluations = 0;
         this.numGeneration = 0;
-         parents.clear();
+        parents.clear();
+        this.numEvaluations = 0;
+        this.numGeneration = 0;
         //evolve all solvers
         for (EAsolver s : arrayOfSolvers) {
             if (!s.stop.isDone(s)) {
                 s.iterate(); // iterate solver  
                 updateHallOfFame(s.parents);
-                
+
             }
             parents.addAll(s.hallOfFame);
+            this.numEvaluations = s.numEvaluations > this.numEvaluations ? s.numEvaluations : this.numEvaluations;
+            this.numGeneration = s.numGeneration > this.numGeneration ? s.numGeneration : this.numGeneration;
             
-            this.numEvaluations += s.numEvaluations;
-            this.numGeneration += s.numGeneration;
-        }   
-         //parents.addAll(hallOfFame);
-        this.numEvaluations /= arrayOfSolvers.length;
-        this.numGeneration /= arrayOfSolvers.length;
+//            this.numEvaluations += s.numEvaluations;
+//            this.numGeneration += s.numGeneration;
+        }
+        //parents.addAll(hallOfFame);
+//        this.numEvaluations /= arrayOfSolvers.length;
+
         //update stastistics
         ((ReportSolverArray) report).updateStats(arrayOfSolvers);
     }
