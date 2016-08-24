@@ -21,8 +21,8 @@
 package GUI.statistics;
 
 import com.evolutionary.report.statistics.AbstractStatistics;
+import com.evolutionary.report.statistics.FunctionCalls;
 import com.evolutionary.solver.EAsolver;
-import com.evolutionary.solverUtils.EAsolverArray;
 import com.evolutionary.solver.MuGA;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -30,34 +30,77 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Stroke;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
-import org.jfree.chart.renderer.xy.DeviationRenderer;
-import org.jfree.data.xy.YIntervalSeries;
-
-import org.jfree.data.xy.YIntervalSeriesCollection;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 /**
- * Created on 11/abr/2016, 10:33:56
+ * Created on 10/abr/2016, 20:05:04
  *
  * @author zulu - computer
  */
-public class StatisticsChartExperiment extends StatisticsChartSolver {
+public class StatisticsChartSolver {
 
-    //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    private static final long serialVersionUID = 201604111033L;
-    //:::::::::::::::::::::::::::  Copyright(c) M@nso  2016  :::::::::::::::::::
-    ///////////////////////////////////////////////////////////////////////////
+    /**
+     * TabedPane to all statistics
+     */
+    JTabbedPane tabs = new JTabbedPane();
+    ArrayList statisticDataSet; // render to dataSet
 
-    public StatisticsChartExperiment(EAsolver solver) {
-        super(solver);
+    public StatisticsChartSolver(EAsolver solver) {
+        setSolver(solver);
+    }
+
+    public JTabbedPane getTabs() {
+        return tabs;
+    }
+
+    public void setSolver(EAsolver solver) {
+        //tabed pane
+        tabs.removeAll();
+        statisticDataSet = new ArrayList<>();
+        //----------------------------------------------------------------------
+        //Conver statistics to GUI
+        ArrayList<AbstractStatistics> stats = solver.report.getStatistics();
+
+        for (int i = 0; i < stats.size(); i++) {
+            JFreeChart chart = createChart(stats.get(i), solver.getSimpleName());
+            formatChart(chart, 1);
+            tabs.add(new ChartPanel(chart), chart.getXYPlot().getRangeAxis().getLabel());
+        }
+        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: insert data to chart
+        //update charts with values
+        ArrayList<Double[]> evolution = solver.report.evolution;
+        AbstractStatistics evals = new FunctionCalls();
+        for (int i = 0; i < evolution.size(); i++) {
+            updateStats(solver.report.getStatisticsData(i, evals), evolution.get(i));
+        }
+        //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        tabs.revalidate();
+    }
+
+    public void updateStats(EAsolver solver) {
+        updateStats(solver.numEvaluations, solver.report.getLastValues());
+    }
+
+    public void updateStats(double numEvals, Double[] values) {
+        for (int i = 0; i < values.length; i++) {
+            ((XYSeriesCollection) statisticDataSet.get(i)).getSeries(0).
+                    add(numEvals, values[i]);
+        }
+
     }
 
     protected JFreeChart createChart(AbstractStatistics stat, String label) {
@@ -69,7 +112,7 @@ public class StatisticsChartExperiment extends StatisticsChartSolver {
         xyplot.setDomainAxis(domain);
         xyplot.setRangeAxis(range);
         // xyplot.setBackgroundPaint(Color.black);
-        YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
+        XYSeriesCollection dataset = new XYSeriesCollection();
 
         xyplot.setDataset(dataset);
 
@@ -87,7 +130,7 @@ public class StatisticsChartExperiment extends StatisticsChartSolver {
 
         chart.setNotify(true);
 
-        YIntervalSeries data = new YIntervalSeries(label);
+        XYSeries data = new XYSeries(label);
         dataset.addSeries(data);
         //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         statisticDataSet.add(dataset); // save render of statistic
@@ -109,46 +152,30 @@ public class StatisticsChartExperiment extends StatisticsChartSolver {
 //         set the renderer's stroke
         Stroke stroke1 = new BasicStroke(
                 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL);
-        DeviationRenderer renderer = new DeviationRenderer(true, false);
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
         for (int i = 0; i < series; i++) {
             renderer.setSeriesStroke(i, stroke1);
             float color = (i) / (float) (series);
             renderer.setSeriesPaint(i, Color.getHSBColor(color, 1, 1));
-            renderer.setSeriesFillPaint(0, setColorTransparency(Color.getHSBColor(color, 1, 1), 0.5f));
         }
         plot.setRenderer(renderer);
     }
 
-    public static Color setColorTransparency(Color c, float transp) {
-        return new Color(
-                c.getRed() / 255.0f,
-                c.getGreen() / 255.0f,
-                c.getBlue() / 255.0f,
-                transp);
-    }
-
-    public void updateStats(EAsolver solver) {
-        Double[] values = solver.report.getLastValues();
-        for (int i = 0; i < values.length; i++) {
-            ((YIntervalSeriesCollection) statisticDataSet.get(i)).getSeries(0).
-                    add(solver.numEvaluations, values[i], values[i] * 0.9, values[i] * 1.2);
-
-        }
-
-    }
+    //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    private static final long serialVersionUID = 201604102005L;
+    //:::::::::::::::::::::::::::  Copyright(c) M@nso  2016  :::::::::::::::::::
+    ///////////////////////////////////////////////////////////////////////////
 
     public static void main(String[] args) {
-        EAsolver template = new MuGA();
-        template.numberOfRun = 10;
-        EAsolverArray solver = new EAsolverArray(template);
+        EAsolver solver = new MuGA();
         solver.InitializeEvolution(true);
-        StatisticsChartSolver demo = new StatisticsChartExperiment(solver);
+        StatisticsChartSolver demo = new StatisticsChartSolver(solver);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setPreferredSize(new Dimension(400, 200));
         panel.add(demo.getTabs(), BorderLayout.CENTER);
-        JFrame frm = new JFrame("demo Experiment");
+        JFrame frm = new JFrame("demo");
         frm.getContentPane().add(panel);
         frm.pack();
         frm.setLocationRelativeTo(null);
