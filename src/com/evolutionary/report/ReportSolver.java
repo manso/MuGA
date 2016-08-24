@@ -133,7 +133,7 @@ public class ReportSolver {
 
     public static String getReportFileName(EAsolver solver, int number) {
         String path = solver.report.path;
-         if (MyFile.getFileName(solver.report.filename).isEmpty()) {
+        if (MyFile.getFileName(solver.report.filename).isEmpty()) {
             solver.report.filename = DEFAULT_FILE_NAME;
         }
         String filename = MyFile.getFileName(solver.report.filename) + "_"
@@ -318,7 +318,8 @@ public class ReportSolver {
             }
 
             file = new PrintWriter(path + File.separatorChar + filename);
-             file.println(MyString.toFileString(MyString.LINE));
+            //file = new PrintWriter(path + File.separatorChar + solver.solverName + ".txt");
+            file.println(MyString.toFileString(MyString.LINE));
             file.println(MyString.toFileString(MyString.toComment(" Solver Configuration")));
             file.println(MyString.toFileString(MyString.LINE));
             file.println(MyString.toFileString(solver.toString()));

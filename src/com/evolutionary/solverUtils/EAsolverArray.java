@@ -22,7 +22,6 @@ package com.evolutionary.solverUtils;
 
 import com.evolutionary.Genetic;
 import com.evolutionary.operator.GeneticOperator;
-import com.evolutionary.problem.Solution;
 import com.evolutionary.report.ReportSolver;
 import com.evolutionary.report.ReportSolverArray;
 import com.evolutionary.solver.EAsolver;
@@ -55,6 +54,7 @@ public class EAsolverArray extends EAsolver {
 
     public EAsolverArray(EAsolver template) {
         //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        this.solverName = template.solverName;
         //copy information from template
         this.template = template;
         this.numberOfRun = template.numberOfRun;
@@ -96,6 +96,7 @@ public class EAsolverArray extends EAsolver {
         //build solvers
         for (int i = 0; i < arrayOfSolvers.length; i++) {
             arrayOfSolvers[i] = template.getSolverClone();
+            arrayOfSolvers[i].solverName = template.solverName + String.format("_%03d", i);
             //one run
             arrayOfSolvers[i].numberOfRun = 1;
             // random seed initialized by template.random
@@ -148,8 +149,6 @@ public class EAsolverArray extends EAsolver {
         this.numEvaluations = 0;
         this.numGeneration = 0;
         parents.clear();
-        this.numEvaluations = 0;
-        this.numGeneration = 0;
         //evolve all solvers
         for (EAsolver s : arrayOfSolvers) {
             if (!s.stop.isDone(s)) {
@@ -158,14 +157,15 @@ public class EAsolverArray extends EAsolver {
 
             }
             parents.addAll(s.hallOfFame);
+            //get maximum of evaluations
             this.numEvaluations = s.numEvaluations > this.numEvaluations ? s.numEvaluations : this.numEvaluations;
+            //get max of generation
             this.numGeneration = s.numGeneration > this.numGeneration ? s.numGeneration : this.numGeneration;
-            
+
 //            this.numEvaluations += s.numEvaluations;
 //            this.numGeneration += s.numGeneration;
         }
         //parents.addAll(hallOfFame);
-//        this.numEvaluations /= arrayOfSolvers.length;
 
         //update stastistics
         ((ReportSolverArray) report).updateStats(arrayOfSolvers);
@@ -238,11 +238,11 @@ public class EAsolverArray extends EAsolver {
         }
 
         public void run() {
-            System.out.println("Start " + Thread.currentThread().getName() + " -> " + solver.report.filename);
+            System.out.println("Start " + Thread.currentThread().getName() + " -> " + solver.solverName);
             solver.random.setSeed(solver.randomSeed);
             solver.solve(solver.report.verbose);
             solver.report.save();
-            System.out.println("Stop " + Thread.currentThread().getName() + " -> " + solver.report.filename);
+            System.out.println("Stop " + Thread.currentThread().getName() + " -> " + solver.solverName);
         }
     }
 

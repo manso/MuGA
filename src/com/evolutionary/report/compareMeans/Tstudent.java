@@ -74,19 +74,19 @@ public class Tstudent {
         txt.append("\n");
         //::::::::::::::::::::::::: DATA ::::::::::::::::::::::::::::::::::::::
         for (int i = 0; i < solvers.size(); i++) {
-            txt.append(MyString.align(solvers.get(i).report.filename, ReportSolver.FIELD_SIZE));
+            txt.append(MyString.align(solvers.get(i).solverName, ReportSolver.FIELD_SIZE));
             for (int j = 0; j < compare95.length; j++) {
                 txt.append(" " + MyString.center(compare95[i][j] + "", 4));
             }
             txt.append(" " + MyString.center(score95[i] + "", 5));
             txt.append(" " + MyString.center(rank95[i] + "", 5));
-            txt.append(" " + MyString.align(solvers.get(i).report.filename, ReportSolver.FIELD_SIZE));
+            txt.append(" " + MyString.align(solvers.get(i).solverName, ReportSolver.FIELD_SIZE));
             for (int j = 0; j < compare99.length; j++) {
                 txt.append(" " + MyString.center(compare99[i][j] + "", 4));
             }
             txt.append(" " + MyString.center(score99[i] + "", 5));
             txt.append(" " + MyString.center(rank99[i] + "", 5));
-            txt.append(" " + MyString.align(solvers.get(i).report.filename, ReportSolver.FIELD_SIZE));
+            txt.append(" " + MyString.align(solvers.get(i).solverName, ReportSolver.FIELD_SIZE));
             for (int j = 0; j < p_value.length; j++) {
                 txt.append(" " + MyString.align(String.format(Locale.US, "%4.3f", p_value[i][j]), 6));
 

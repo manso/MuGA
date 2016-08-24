@@ -20,8 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////
 package com.evolutionary.solverUtils;
 
-import com.evolutionary.solverUtils.FileSimulation;
-import com.evolutionary.solverUtils.FileSolver;
 import com.evolutionary.report.ReportSimulation;
 import com.evolutionary.solver.EAsolver;
 import com.utils.MyFile;
@@ -64,9 +62,9 @@ public class EAsimulation {
             return;
         }
         for (int i = 0; i < solvers.size(); i++) {
-            System.out.println("Solving " + solvers.get(i).report.filename);
+            System.out.println("Solving " + solvers.get(i).solverName);
             solvers.get(i).solve(verbose);
-           // System.out.println(solvers.get(i).report.getEvolutionString());
+            // System.out.println(solvers.get(i).report.getEvolutionString());
         }
         if (solvers.size() > 1) { //multiple solvers
             saveFinalReport();
@@ -92,14 +90,14 @@ public class EAsimulation {
             out = new PrintWriter(fileName);
             out.println(MyString.toFileString(getFinalReport()));
             out.print(MyString.toFileString(MyString.toComment(MyString.getCopyright())));
-                        
+
         } catch (Exception ex) {
             Logger.getLogger(EAsimulation.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             out.close();
         }
-        ReportSimulation.saveStatisticsCSV(solvers,fileName);
-        ReportSimulation.saveStatisticsCSV(solvers,fileName, Locale.getDefault() , ";");
+        ReportSimulation.saveStatisticsCSV(solvers, fileName);
+        ReportSimulation.saveStatisticsCSV(solvers, fileName, Locale.getDefault(), ";");
     }
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -109,7 +107,7 @@ public class EAsimulation {
 
     public static void main(String[] args) {
         EAsimulation sim = new EAsimulation();
-        sim.load("HIFF_simul.txt");
+        sim.load("test/teste1.txt");
 //        System.out.println(sim.getFinalReport());
         sim.solve(false);
     }

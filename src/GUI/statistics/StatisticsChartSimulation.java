@@ -23,7 +23,6 @@ package GUI.statistics;
 import com.evolutionary.report.ReportSolverArray;
 import com.evolutionary.report.StatisticElement;
 import com.evolutionary.report.statistics.AbstractStatistics;
-import com.evolutionary.report.statistics.FunctionCalls;
 import com.evolutionary.solver.EAsolver;
 import com.evolutionary.solverUtils.EAsolverArray;
 import com.evolutionary.solver.MuGA;
@@ -45,7 +44,6 @@ import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.DeviationRenderer;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.data.xy.YIntervalSeries;
 
 import org.jfree.data.xy.YIntervalSeriesCollection;
@@ -71,7 +69,7 @@ public class StatisticsChartSimulation extends StatisticsChartSolver {
         ArrayList<AbstractStatistics> stats = solver.report.getStatistics();
 
         for (int i = 0; i < stats.size(); i++) {
-            JFreeChart chart = createChart(stats.get(i), solver.getSimpleName());
+            JFreeChart chart = createChart(stats.get(i), solver.solverName);
             formatChart(chart, 1);
             tabs.add(new ChartPanel(chart), chart.getXYPlot().getRangeAxis().getLabel());
         }

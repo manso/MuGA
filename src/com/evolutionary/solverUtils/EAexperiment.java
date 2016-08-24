@@ -22,11 +22,10 @@ package com.evolutionary.solverUtils;
 
 import com.evolutionary.report.ReportSimulation;
 import com.evolutionary.solver.EAsolver;
-import com.utils.MyFile;
 import com.utils.MyString;
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,50 +36,76 @@ import java.util.logging.Logger;
  */
 public class EAexperiment {
 
-    ArrayList<EAsolver> solvers = new ArrayList<>();
+    public ArrayList<EAsolver> solvers = new ArrayList<>();
     String fileName = "simulation_result.txt"; // filename
 
-
     public void load(String simulationFileName) {
-        solvers = FileSimulation.loadSimulation(simulationFileName);
-        String path = MyFile.getPath(simulationFileName)
-                + MyFile.getFileName(simulationFileName);
-        
-        (new File(path)).mkdirs();
-        fileName = MyFile.getPath(path)
-                + "result_"
-                + MyFile.getFileName(simulationFileName)
-                 + "."
-                + FileSolver.FILE_EXTENSION;       
+        ArrayList<EAsolver> fileSolvers = FileSimulation.loadSimulation(simulationFileName);
+        if (solvers.isEmpty()) { // no solvers to load
+            return;
+        } else {
+            solvers.addAll(fileSolvers);
+        }
     }
 
     public void solve(boolean verbose) {
-        for (int i = 0; i < solvers.size(); i++) {
-            System.out.println("Solving " + solvers.get(i).report.filename);
-            solvers.get(i).solve(verbose);
-            System.out.println(solvers.get(i).report.getEvolutionString());
+        if (solvers.isEmpty()) { //nothing to solve
+            return;
         }
-        printFinalReport();
+        for (int i = 0; i < solvers.size(); i++) {
+            System.out.println("Solving " + solvers.get(i).solverName);
+            solvers.get(i).solve(verbose);
+            // System.out.println(solvers.get(i).report.getEvolutionString());
+        }
+        if (solvers.size() > 1) { //multiple solvers
+            saveFinalReport();
+        }
     }
 
-    public void printFinalReport() {
+    public void startEvolution() {
+        for (int i = 0; i < solvers.size(); i++) {
+            solvers.get(i).InitializeEvolution(false);
+        }
+    }
+
+    public void stopEvolution(EAsolver solver) {
+        solver.report.save();        
+    }
+
+    public String getFinalReport() {
+        StringBuffer txt = new StringBuffer();
+        txt.append(ReportSimulation.getReportMeans(solvers) + "\n");
+        txt.append(MyString.LINE + "\n");
+        txt.append(ReportSimulation.getReportSTD(solvers) + "\n");
+        txt.append(MyString.LINE + "\n");
+        txt.append(ReportSimulation.getReportData(solvers) + "\n");
+        txt.append(MyString.LINE + "\n");
+        txt.append(MyString.toComment(ReportSimulation.getSolversInfo(solvers)) + "\n");
+        txt.append(MyString.LINE + "\n");
+        return txt.toString();
+    }
+
+    public void saveFinalReport() {
         PrintWriter out = null;
         try {
             out = new PrintWriter(fileName);
-            out.println(MyString.toFileString(ReportSimulation.getReportMeans(solvers)));
-            out.println(MyString.LINE);
-            out.println(MyString.toFileString(ReportSimulation.getReportSTD(solvers)));
-            out.println(MyString.LINE);
-            out.println(MyString.toFileString(ReportSimulation.getReportData(solvers)));
-            out.println(MyString.LINE);            
-            out.println(MyString.toFileString(MyString.toComment(ReportSimulation.getSolversInfo(solvers))));
-            out.println(MyString.LINE);
+            out.println(MyString.toFileString(getFinalReport()));
             out.print(MyString.toFileString(MyString.toComment(MyString.getCopyright())));
+
         } catch (Exception ex) {
-            Logger.getLogger(EAexperiment.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EAsimulation.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             out.close();
         }
+        ReportSimulation.saveStatisticsCSV(solvers, fileName);
+        ReportSimulation.saveStatisticsCSV(solvers, fileName, Locale.getDefault(), ";");
+    }
+
+    public static void main(String[] args) {
+        EAsimulation sim = new EAsimulation();
+        sim.load("test/teste1.txt");
+//        System.out.println(sim.getFinalReport());
+        sim.solve(false);
     }
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -88,10 +113,13 @@ public class EAexperiment {
     //:::::::::::::::::::::::::::  Copyright(c) M@nso  2016  :::::::::::::::::::
     ///////////////////////////////////////////////////////////////////////////
 
-    public static void main(String[] args) {
-        EAexperiment sim = new EAexperiment();
-        sim.load("experiment01.txt");
-        sim.solve(false);
+    public boolean isDone() {
+        for (EAsolver s : solvers) {
+            if (!s.isDone()) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

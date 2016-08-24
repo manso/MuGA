@@ -39,8 +39,7 @@ public class ExploreSolver extends javax.swing.JFrame {
     //main meno of this frame
     JFrame mainMenu;
 
-    UiSolver setupSolver = new UiSolver();
-    ; // Configuration solver 
+    UiSolver setupSolver = new UiSolver(); // Configuration solver 
     UiSolver runningSolver = new UiSolver(); // running solver
 
     UIpopulation displayPop;
@@ -72,6 +71,7 @@ public class ExploreSolver extends javax.swing.JFrame {
                 //   source.updateEvolutionStats();
                 onEvolutionChanges(source);
                 addSimulationResultTXT(source);
+                source.report.save();
             }
         });
 
@@ -374,7 +374,7 @@ public class ExploreSolver extends javax.swing.JFrame {
     }//GEN-LAST:event_btRunActionPerformed
 
     private void sldVelocityStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldVelocityStateChanged
-        runningSolver.setTimeToSleep((10-sldVelocity.getValue())*100);
+        runningSolver.setTimeToSleep((10 - sldVelocity.getValue()) * 100);
     }//GEN-LAST:event_sldVelocityStateChanged
 
     /**
@@ -433,7 +433,6 @@ public class ExploreSolver extends javax.swing.JFrame {
     private javax.swing.JTextArea txtSolver;
     // End of variables declaration//GEN-END:variables
 
-    
     private void initSolver() {
         //load solver from textArea
         EAsolver solver = FileSolver.loadSolver(txtSolver.getText(), ReportSolver.DEFAULT_FILE_NAME);

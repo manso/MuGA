@@ -6,50 +6,41 @@
 package GUI;
 
 import GUI.setup.SetupSolverDialog;
-import GUI.setup.UIpopulation;
 import GUI.solver.EvolutionEventListener;
+import GUI.solver.UIexperiment;
 import GUI.solver.UiSolver;
-import GUI.statistics.StatisticsChartSimulation;
-import GUI.statistics.StatisticsChartSolver;
-import com.evolutionary.report.ReportSolver;
+import GUI.statistics.StatisticsChartExperiment;
 import com.evolutionary.solver.EAsolver;
-import com.evolutionary.solverUtils.EAsolverArray;
 import com.evolutionary.solver.MuGA;
+import com.evolutionary.solverUtils.EAexperiment;
+import com.evolutionary.solverUtils.FileSimulation;
 import com.evolutionary.solverUtils.FileSolver;
-import java.awt.BorderLayout;
-import java.awt.Font;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author zulu
  */
-public class ExploreSolver extends javax.swing.JFrame {
+public class ExploreSimulation extends javax.swing.JFrame {
 
     //main meno of this frame
     JFrame mainMenu;
+    EAexperiment simulation = new EAexperiment();
+    UIexperiment uiSolver = new UIexperiment();
 
-    UiSolver setupSolver = new UiSolver();
-    ; // Configuration solver 
-    UiSolver runningSolver = new UiSolver(); // running solver
+    StatisticsChartExperiment statsPanel;
 
-    UIpopulation displayPop;
-    StatisticsChartSolver statsPanel;
+    int selectedSolverIndex = -1;
 
     /**
      * Creates new form ExploreSolver
      */
-    public ExploreSolver(JFrame mainMenu) {
+    public ExploreSimulation(JFrame mainMenu) {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         initComponents();
         this.mainMenu = mainMenu;
@@ -57,73 +48,8 @@ public class ExploreSolver extends javax.swing.JFrame {
     }
 
     public void initMyComponents() {
-        displayPop = new UIpopulation();
-        pnPopulation.add(displayPop, BorderLayout.CENTER);
-        setSolver(new MuGA());
-        runningSolver.addListener(new EvolutionEventListener() {
-            @Override
-            public void onEvolutionChanges(EAsolver source) {
-                displayPop.updatePopulation(source.parents);
-                statsPanel.updateStats(source);
-            }
-
-            @Override
-            public void onEvolutionComplete(EAsolver source) {
-                //   source.updateEvolutionStats();
-                onEvolutionChanges(source);
-                addSimulationResultTXT(source);
-            }
-        });
-
-    }
-
-    private void addSimulationResultTXT(EAsolver source) {
-        String txt = source.report.getEvolutionString();
-        JTextArea txtEvol = new JTextArea(txt);
-        txtEvol.setFont(new java.awt.Font("Courier New", 0, 14));
-        JScrollPane view = new JScrollPane(txtEvol);
-        tpSolver.add("Solver Result", view);
-        tpSolver.setSelectedComponent(view);
-    }
-
-    public void setSolver(EAsolver newSolver) {
-        this.setupSolver.setMySolver(newSolver);
-        //setupSolver.getMySolver().InitializeEvolution(false);
-        displayPop.setPopulation(setupSolver.getMySolver().parents);
-        txtSolver.setText(setupSolver.toString());
-        // txtSolver.setText(newSolver.report.getEvolutionString());
-//        txtSolver.setCaretPosition(0);
-//        if(1 == 1)
-//            return;
-        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-        int selectedIndex = tpSolver.getSelectedIndex();
-        // tpSolver.setSelectedComponent(pnPopulation);
-        displayPop.setPopulation(newSolver.parents);
-        tpSolver.removeAll();
-        if (newSolver instanceof EAsolverArray) {
-            statsPanel = new StatisticsChartSimulation(newSolver);
-        } else {
-            statsPanel = new StatisticsChartSolver(newSolver);
-        }
-        tpSolver.addTab("Setup", pnSetupSolver);
-        tpSolver.addTab("Population", pnPopulation);
-        int totalTabs = statsPanel.getTabs().getTabCount();
-        for (int i = 0; i < totalTabs; i++) {
-            tpSolver.addTab(statsPanel.getTabs().getTitleAt(0), statsPanel.getTabs().getComponentAt(0));
-        }
-        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: evolution result txt
-        if (!newSolver.report.evolution.isEmpty()) {
-            addSimulationResultTXT(newSolver);
-        }
-
-        if (selectedIndex < tpSolver.getTabCount()) {
-            tpSolver.setSelectedIndex(selectedIndex);
-        }
-        this.revalidate();
-        this.repaint();
-        runningSolver.setMySolver(newSolver);
-        //::::::::::::::::::::::::::::::::
-
+        DefaultListModel<String> model = new DefaultListModel<>();
+        lstSolvers.setModel(model);
     }
 
     /**
@@ -137,8 +63,6 @@ public class ExploreSolver extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         btMenu = new javax.swing.JButton();
-        btIterateSolver = new javax.swing.JButton();
-        sldVelocity = new javax.swing.JSlider();
         btStart = new javax.swing.JButton();
         btRun = new javax.swing.JToggleButton();
         jPanel3 = new javax.swing.JPanel();
@@ -147,12 +71,16 @@ public class ExploreSolver extends javax.swing.JFrame {
         tpSolver = new javax.swing.JTabbedPane();
         pnSetupSolver = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
-        btOpen = new javax.swing.JButton();
+        btNew = new javax.swing.JButton();
+        btOpen1 = new javax.swing.JButton();
         btEdit = new javax.swing.JButton();
+        btClone = new javax.swing.JButton();
         btSave = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
         txtSolver = new javax.swing.JTextArea();
-        pnPopulation = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        lstSolvers = new javax.swing.JList<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -161,22 +89,6 @@ public class ExploreSolver extends javax.swing.JFrame {
         btMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btMenuActionPerformed(evt);
-            }
-        });
-
-        btIterateSolver.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/icons/Iterate_32.png"))); // NOI18N
-        btIterateSolver.setText("step by step");
-        btIterateSolver.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btIterateSolverActionPerformed(evt);
-            }
-        });
-
-        sldVelocity.setMaximum(10);
-        sldVelocity.setBorder(javax.swing.BorderFactory.createTitledBorder("Velocity"));
-        sldVelocity.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                sldVelocityStateChanged(evt);
             }
         });
 
@@ -203,13 +115,9 @@ public class ExploreSolver extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addComponent(btStart)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btIterateSolver)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(141, 141, 141)
                 .addComponent(btRun, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(sldVelocity, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 243, Short.MAX_VALUE)
                 .addComponent(btMenu))
         );
         jPanel1Layout.setVerticalGroup(
@@ -218,9 +126,7 @@ public class ExploreSolver extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btStart)
-                        .addComponent(btIterateSolver)
                         .addComponent(btRun))
-                    .addComponent(sldVelocity, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btMenu))
                 .addGap(0, 13, Short.MAX_VALUE))
         );
@@ -248,11 +154,19 @@ public class ExploreSolver extends javax.swing.JFrame {
 
         pnSetupSolver.setLayout(new java.awt.BorderLayout());
 
-        btOpen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/icons/File_Open-24.png"))); // NOI18N
-        btOpen.setText("Open");
-        btOpen.addActionListener(new java.awt.event.ActionListener() {
+        btNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/icons/DNA-24.png"))); // NOI18N
+        btNew.setText("New");
+        btNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btOpenActionPerformed(evt);
+                btNewActionPerformed(evt);
+            }
+        });
+
+        btOpen1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/icons/File_Open-24.png"))); // NOI18N
+        btOpen1.setText("Open");
+        btOpen1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btOpen1ActionPerformed(evt);
             }
         });
 
@@ -264,8 +178,16 @@ public class ExploreSolver extends javax.swing.JFrame {
             }
         });
 
-        btSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/icons/File_Save-24.png"))); // NOI18N
-        btSave.setText("Save");
+        btClone.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/icons/reload_24.png"))); // NOI18N
+        btClone.setText("Clone");
+        btClone.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btCloneActionPerformed(evt);
+            }
+        });
+
+        btSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/icons/Delete-24.png"))); // NOI18N
+        btSave.setText("Delete");
         btSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btSaveActionPerformed(evt);
@@ -277,17 +199,24 @@ public class ExploreSolver extends javax.swing.JFrame {
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
-                .addComponent(btOpen, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btSave, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(2, 2, 2)
+                .addComponent(btNew, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(btOpen1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(btEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(btClone, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(btSave, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btOpen)
-            .addComponent(btEdit)
-            .addComponent(btSave)
+            .addComponent(btNew, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(btOpen1, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(btEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(btClone, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(btSave, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pnSetupSolver.add(jPanel6, java.awt.BorderLayout.NORTH);
@@ -295,14 +224,36 @@ public class ExploreSolver extends javax.swing.JFrame {
         txtSolver.setColumns(20);
         txtSolver.setFont(new java.awt.Font("Courier New", 0, 14)); // NOI18N
         txtSolver.setRows(5);
-        jScrollPane2.setViewportView(txtSolver);
+        jScrollPane3.setViewportView(txtSolver);
 
-        pnSetupSolver.add(jScrollPane2, java.awt.BorderLayout.CENTER);
+        pnSetupSolver.add(jScrollPane3, java.awt.BorderLayout.CENTER);
 
-        tpSolver.addTab("Solver", pnSetupSolver);
+        lstSolvers.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        lstSolvers.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                lstSolversValueChanged(evt);
+            }
+        });
+        jScrollPane2.setViewportView(lstSolvers);
 
-        pnPopulation.setLayout(new java.awt.BorderLayout());
-        tpSolver.addTab("Population", pnPopulation);
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE)
+        );
+
+        pnSetupSolver.add(jPanel2, java.awt.BorderLayout.LINE_START);
+
+        tpSolver.addTab("Experiment", pnSetupSolver);
 
         pnSolver_Pop.add(tpSolver, java.awt.BorderLayout.CENTER);
 
@@ -317,65 +268,171 @@ public class ExploreSolver extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btMenuActionPerformed
 
-    private void btOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btOpenActionPerformed
+    private void btNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btNewActionPerformed
+        EAsolver s = new MuGA();
+        s.numberOfRun = 32;
+        simulation.solvers.add(s);
+        displaySolvers();
+        lstSolvers.setSelectedIndex(simulation.solvers.size() - 1);
+
+    }//GEN-LAST:event_btNewActionPerformed
+
+    public void updateSelectedSolver() {
+        if (selectedSolverIndex >= 0 && !txtSolver.getText().equalsIgnoreCase(simulation.solvers.get(selectedSolverIndex).toString())) {
+            EAsolver solver = FileSolver.loadSolver(txtSolver.getText(), "");
+            if (solver != null) {
+                simulation.solvers.set(selectedSolverIndex, solver);
+                displaySolvers();
+            }
+        }
+    }
+
+    private void displaySolvers() {
+        DefaultListModel lst = new DefaultListModel();
+        DefaultListModel old = (DefaultListModel) lstSolvers.getModel();
+        boolean update = false;
+        for (int i = 0; i < simulation.solvers.size(); i++) {
+            if (old.size() > i && !old.getElementAt(i).toString().equalsIgnoreCase(simulation.solvers.get(i).solverName)) {
+                update = true;
+            }
+            lst.addElement(simulation.solvers.get(i).solverName);
+        }
+        if (update || lst.size() != old.size()) {
+            lstSolvers.setModel(lst);
+            lstSolvers.setSelectedIndex(selectedSolverIndex);
+        }
+    }
+
+
+    private void btEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEditActionPerformed
+        EAsolver s = FileSolver.loadSolver(txtSolver.getText(), txtPathSimulation.getText());
+        if (s == null) {
+            return;
+        }
+        SetupSolverDialog setup = new SetupSolverDialog(s);
+        simulation.solvers.set(selectedSolverIndex, setup.solver);
+        txtSolver.setText(setup.solver.toString());
+        displaySolvers();
+
+    }//GEN-LAST:event_btEditActionPerformed
+
+    private void btSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSaveActionPerformed
+        if (selectedSolverIndex >= 0) {
+            simulation.solvers.remove(selectedSolverIndex);
+            txtSolver.setText("");
+            if (simulation.solvers.size() > selectedSolverIndex) {
+                displaySolvers();
+            } else {
+                selectedSolverIndex--;
+                displaySolvers();
+            }
+        }
+    }//GEN-LAST:event_btSaveActionPerformed
+
+
+    private void btStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btStartActionPerformed
+        uiSolver.initExperiment(simulation.solvers);
+        initStatisticsPanels(); //create statistics panels        
+        for (int i = 0; i < simulation.solvers.size(); i++) {
+            uiSolver.addListener(i, new EvolutionEventListener() {
+                @Override
+                public void onEvolutionChanges(EAsolver source) {
+                    statsPanel.updateStats(source);
+                }
+
+                @Override
+                public void onEvolutionComplete(EAsolver source) {
+                    simulation.stopEvolution(source);
+                    if (simulation.isDone()) {
+                        System.out.println("DONE . . .");
+                        //display final result
+                    }
+                }
+            });
+        }
+        uiSolver.startSolvers();
+        btRun.setSelected(true);
+        btRun.setText("Stop");
+    }//GEN-LAST:event_btStartActionPerformed
+
+    private void initStatisticsPanels() {
+        //load solver from textArea
+        updateSelectedSolver();
+
+        int selectedIndex = tpSolver.getSelectedIndex();
+        //initialize simulation
+        simulation.startEvolution();
+        //remove all tabs from GUI
+        tpSolver.removeAll();
+        //create new Tabs
+
+        statsPanel = new StatisticsChartExperiment(simulation.solvers);
+
+        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: SETUP and POPULATION
+        tpSolver.addTab("Experiment", pnSetupSolver);
+        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: STATISTICS
+        int totalTabs = statsPanel.getTabs().getTabCount();
+        for (int i = 0; i < totalTabs; i++) {
+            tpSolver.addTab(statsPanel.getTabs().getTitleAt(0), statsPanel.getTabs().getComponentAt(0));
+        }
+
+        if (selectedIndex < tpSolver.getTabCount()) {
+            tpSolver.setSelectedIndex(selectedIndex);
+        }
+        this.revalidate();
+        this.repaint();
+    }
+
+    private void btRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRunActionPerformed
+        if (!btRun.isSelected()) {
+            uiSolver.stopSolvers();
+            btRun.setText("Continue");
+        } else {
+            uiSolver.startSolvers();
+            btRun.setText("Stop");
+        }
+
+    }//GEN-LAST:event_btRunActionPerformed
+
+    private void btOpen1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btOpen1ActionPerformed
         JFileChooser file = new JFileChooser();
         file.setCurrentDirectory(new File(txtPathSimulation.getText()));
         file.setSelectedFile(new File(txtPathSimulation.getText()));
         file.setFileFilter(new FileNameExtensionFilter("Muga Simulation Files", FileSolver.FILE_EXTENSION));
         int returnVal = file.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            EAsolver s = FileSolver.load(file.getSelectedFile().getPath());
-            txtPathSimulation.setText(file.getSelectedFile().getPath());
-            setSolver(s);
+            ArrayList<EAsolver> sims = FileSimulation.loadSimulation(file.getSelectedFile().getPath());
+            if (sims.size() > 0) {
+                simulation.solvers.addAll(sims);
+                displaySolvers();
+            }
         }
-    }//GEN-LAST:event_btOpenActionPerformed
+    }//GEN-LAST:event_btOpen1ActionPerformed
 
-
-    private void btEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEditActionPerformed
-        EAsolver s = FileSolver.loadSolver(txtSolver.getText(), txtPathSimulation.getText());
-        SetupSolverDialog setup = new SetupSolverDialog(s);
-        setSolver(setup.solver);
-
-    }//GEN-LAST:event_btEditActionPerformed
-
-    private void btSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSaveActionPerformed
-        JFileChooser file = new JFileChooser(txtPathSimulation.getText());
-        file.setCurrentDirectory(new File(txtPathSimulation.getText()));
-        file.setSelectedFile(new File(txtPathSimulation.getText()));
-        file.setFileFilter(new FileNameExtensionFilter("Muga Simulation Files", FileSolver.FILE_EXTENSION));
-        int returnVal = file.showSaveDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            runningSolver.getMySolver().report.save(file.getSelectedFile().getPath());
+    private void btCloneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCloneActionPerformed
+        if (lstSolvers.getSelectedIndex() >= 0) {
+            EAsolver s = FileSolver.loadSolver(txtSolver.getText(), txtPathSimulation.getText());
+            if (s == null) {
+                return;
+            }
+            simulation.solvers.add(s);
+            displaySolvers();
+            lstSolvers.setSelectedIndex(simulation.solvers.size() - 1);
         }
-    }//GEN-LAST:event_btSaveActionPerformed
 
 
-    private void btIterateSolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btIterateSolverActionPerformed
-        btRun.setSelected(false);
-        runningSolver.stop();
-        runningSolver.iterate();
-    }//GEN-LAST:event_btIterateSolverActionPerformed
+    }//GEN-LAST:event_btCloneActionPerformed
 
-    private void btStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btStartActionPerformed
-        runningSolver.stop();
-        initSolver(); // create solver to run
-        tpSolver.setSelectedIndex(1); // population
-        btRun.setSelected(true);
-        runningSolver.start();
-    }//GEN-LAST:event_btStartActionPerformed
-
-    private void btRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRunActionPerformed
-        if (btStart.isSelected()) {
-            runningSolver.stop();
+    private void lstSolversValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstSolversValueChanged
+        updateSelectedSolver();
+        if (lstSolvers.getSelectedIndex() >= 0) {
+            txtSolver.setText(simulation.solvers.get(lstSolvers.getSelectedIndex()).toString());
+            selectedSolverIndex = lstSolvers.getSelectedIndex();
         } else {
-            runningSolver.start();
+            txtSolver.setText("");
+            selectedSolverIndex = -1;
         }
-
-    }//GEN-LAST:event_btRunActionPerformed
-
-    private void sldVelocityStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldVelocityStateChanged
-        runningSolver.setTimeToSleep((10-sldVelocity.getValue())*100);
-    }//GEN-LAST:event_sldVelocityStateChanged
+    }//GEN-LAST:event_lstSolversValueChanged
 
     /**
      * @param args the command line arguments
@@ -394,78 +451,48 @@ public class ExploreSolver extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ExploreSolver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ExploreSimulation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ExploreSolver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ExploreSimulation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ExploreSolver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ExploreSimulation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ExploreSolver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ExploreSimulation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ExploreSolver(null).setVisible(true);
+                new ExploreSimulation(null).setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btClone;
     private javax.swing.JButton btEdit;
-    private javax.swing.JButton btIterateSolver;
     private javax.swing.JButton btMenu;
-    private javax.swing.JButton btOpen;
+    private javax.swing.JButton btNew;
+    private javax.swing.JButton btOpen1;
     private javax.swing.JToggleButton btRun;
     private javax.swing.JButton btSave;
     private javax.swing.JButton btStart;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JPanel pnPopulation;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JList<String> lstSolvers;
     private javax.swing.JPanel pnSetupSolver;
     private javax.swing.JPanel pnSolver_Pop;
-    private javax.swing.JSlider sldVelocity;
     private javax.swing.JTabbedPane tpSolver;
     private javax.swing.JLabel txtPathSimulation;
     private javax.swing.JTextArea txtSolver;
     // End of variables declaration//GEN-END:variables
-
-    
-    private void initSolver() {
-        //load solver from textArea
-        EAsolver solver = FileSolver.loadSolver(txtSolver.getText(), ReportSolver.DEFAULT_FILE_NAME);
-        int selectedIndex = tpSolver.getSelectedIndex();
-        //initialize simulation
-        solver.InitializeEvolution(false);
-        //display population
-        displayPop.setPopulation(solver.parents);
-        //remove all tabs from GUI
-        tpSolver.removeAll();
-        //create new Tabs
-        if (solver instanceof EAsolverArray) {
-            statsPanel = new StatisticsChartSimulation(solver);
-        } else {
-            statsPanel = new StatisticsChartSolver(solver);
-        }
-        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: SETUP and POPULATION
-        tpSolver.addTab("Setup", pnSetupSolver);
-        tpSolver.addTab("Population", pnPopulation);
-        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: STATISTICS
-        int totalTabs = statsPanel.getTabs().getTabCount();
-        for (int i = 0; i < totalTabs; i++) {
-            tpSolver.addTab(statsPanel.getTabs().getTitleAt(0), statsPanel.getTabs().getComponentAt(0));
-        }
-
-        if (selectedIndex < tpSolver.getTabCount()) {
-            tpSolver.setSelectedIndex(selectedIndex);
-        }
-        this.revalidate();
-        this.repaint();
-        runningSolver.setMySolver(solver);
-
-    }
 
 }

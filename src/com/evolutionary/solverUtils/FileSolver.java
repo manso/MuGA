@@ -31,7 +31,6 @@ import com.evolutionary.solver.EAsolver;
 import com.evolutionary.stopCriteria.StopCriteria;
 import com.utils.MyFile;
 import com.utils.MyString;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -39,6 +38,7 @@ import java.util.Scanner;
 public class FileSolver {
 
     //  public static final String VERBOSE = "verbose";
+    public static final String SOLVER_NAME = "solver name";
     public static final String RANDOM_SEED = "random seed";
     public static final String NUMBER_OF_RUNS = "number of runs";
 
@@ -85,7 +85,7 @@ public class FileSolver {
         String myname = MyFile.getFullFileName(path);
         String txtFile = MyFile.readFile(myPath + myname);
         if (txtFile == null) {
-           // showError("No Simulation loaded!", path);
+            // showError("No Simulation loaded!", path);
             return null;
         }
         return loadSolver(txtFile, myPath + myname);
@@ -106,10 +106,15 @@ public class FileSolver {
         //---------------------------------------------------------------------------
         //read information about solver
         //---------------------------------------------------------------------------
+        //solver name
+        solver.solverName = loadString(txtFile, SOLVER_NAME);
+        if( solver.solverName.isEmpty()){
+            solver.solverName = solver.getSimpleName();
+        }
         //random seed
         long randomSeed = loadInteger(txtFile, RANDOM_SEED);
         if (randomSeed == -1) {//not defined
-            randomSeed = solver.random.nextLong(); //random namber
+            randomSeed = solver.random.nextLong(); //random number
         }
         solver.randomSeed = randomSeed;
         //number of runs
@@ -163,10 +168,10 @@ public class FileSolver {
         for (Genetic stat : statistics) {
             solver.report.addStatistic((AbstractStatistics) stat);
         }
-        solver.report.setFileName(simulFileName);
+        solver.report.setFileName(simulFileName.isEmpty() ? solver.solverName : simulFileName); // filename or solverName
         solver.updateSolverAtributes();
         solver.report.startStats(solver, false); // reset stats
-        return loadEvolution(solver, txtFile); 
+        return loadEvolution(solver, txtFile);
 
     }
 
@@ -183,6 +188,8 @@ public class FileSolver {
     public static String toString(EAsolver solver) {
         final int SIZE = 20;
         StringBuffer txt = new StringBuffer();
+        txt.append(MyString.setSize(SOLVER_NAME, SIZE) + " = " + solver.solverName + "\n");
+
         txt.append(MyString.setSize(RANDOM_SEED, SIZE) + " = " + solver.randomSeed + "\n");
         txt.append(MyString.setSize(NUMBER_OF_RUNS, SIZE) + " = " + solver.numberOfRun + "\n");
 
@@ -255,6 +262,17 @@ public class FileSolver {
     //:::::::::::::  L O A D  I N T E G E R S :::::::::::::::::::::::::::::::::
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     public static long loadInteger(String txt, String KEY) {
+        try {
+            return Long.parseLong(loadString(txt, KEY));
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    //:::::::::::::  L O A D  S T R I N G  :::::::::::::::::::::::::::::::::
+    //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    public static String loadString(String txt, String KEY) {
         Scanner file = new Scanner(txt);
         String line;
         while (file.hasNext()) {
@@ -269,12 +287,12 @@ public class FileSolver {
                 //remove =
                 line = line.substring(1).trim();
                 try {
-                    return Long.parseLong(line);
+                    return line;
                 } catch (Exception e) {
                 }
             }
         }
-        return -1;
+        return "";
     }
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -332,7 +350,7 @@ public class FileSolver {
             } //----------------  Statistic
             else if (line.startsWith(STATISTIC_KEY)) {
                 //remove key         
-                line = line.substring(STATISTIC_KEY.length()).trim();                
+                line = line.substring(STATISTIC_KEY.length()).trim();
                 //ignore first number (generation number)
                 line = line.substring(line.indexOf(" "));
                 solver.report.addDataToStatistics(line);
@@ -350,18 +368,18 @@ public class FileSolver {
         //----------------------------------------------------------------------
         if (solver instanceof EAsolverArray && !solver.report.filename.startsWith(ReportSolver.DEFAULT_FILE_NAME)) {
             //calculate solvers results statistics
-           // ((ReportSolverArray) solver.report).calulateEvolutionResult();
+            // ((ReportSolverArray) solver.report).calulateEvolutionResult();
             // load individual solvers
             EAsolverArray array = (EAsolverArray) solver;
             for (int i = 0; i < array.arrayOfSolvers.length; i++) {
                 //try to load solver
-                EAsolver s = load( ReportSolver.getReportFileName(array, i));
+                EAsolver s = load(ReportSolver.getReportFileName(array, i));
                 if (s != null) {
                     array.arrayOfSolvers[i] = s;
                 }
             }
         }
-      //  System.out.println("" + solver.report.getEvolutionString());
+        //  System.out.println("" + solver.report.getEvolutionString());
         return solver;
     }
 

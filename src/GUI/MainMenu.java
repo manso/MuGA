@@ -206,9 +206,9 @@ public class MainMenu extends javax.swing.JFrame {
     }//GEN-LAST:event_btResearchActionPerformed
 
     private void btRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRunActionPerformed
-//        Run_MeanSolver form = new Run_MeanSolver(this);
-//        form.setVisible(true);
-//        this.setVisible(false);
+        ExploreSimulation form = new ExploreSimulation(this);
+        form.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_btRunActionPerformed
 
     private void btExploreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btExploreActionPerformed

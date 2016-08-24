@@ -48,6 +48,7 @@ public abstract class EAsolver extends Genetic {
 
     public abstract void iterate();
 
+    public String solverName = this.getClass().getSimpleName(); // name of the solver
     public long randomSeed = 1234;                   // seed to random  
     public int numberOfRun = 1; // number of run (
     public int numEvaluations = 0; // number of evaluations (updated by genetic operators)
@@ -70,6 +71,7 @@ public abstract class EAsolver extends Genetic {
 
     /**
      * initialize all the components of the evolution
+     *
      * @param verbose display messages in console ?
      */
     public void InitializeEvolution(boolean verbose) {
@@ -168,6 +170,8 @@ public abstract class EAsolver extends Genetic {
 
     public EAsolver getSolverClone() {
         EAsolver solver = (EAsolver) getClone(this);
+        solver.solverName = solverName;
+        
         solver.numberOfRun = this.numberOfRun;
 
         solver.randomSeed = this.randomSeed;

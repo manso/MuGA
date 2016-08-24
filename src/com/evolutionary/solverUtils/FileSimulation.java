@@ -71,6 +71,8 @@ public class FileSimulation extends FileSolver {
         //---------------------------------------------------------------------------
         //read information about solvers
         //---------------------------------------------------------------------------
+        String solverName = loadString(txtFile, SOLVER_NAME);
+
         //random seed
         long randomSeed = loadInteger(txtFile, RANDOM_SEED);
         //random generator
@@ -106,11 +108,15 @@ public class FileSimulation extends FileSolver {
         List<List> perms = combinations(all);
         //generate solvers 
         ArrayList<EAsolver> allSolvers = new ArrayList<>();
+
         for (int i = 0; i < perms.size(); i++) {
             List lst = perms.get(i);
             //0 - solver 
             EAsolver solver = ((EAsolver) lst.get(0)).getSolverClone();
-                       
+            if (solver.solverName.isEmpty()) {
+                solver.solverName = solverName + String.format("_%02d", i);
+            }
+
             // other combinations
             if (lst.get(1) != null) {
                 solver.problem = ((Solution) lst.get(1)).getClone();
@@ -139,10 +145,10 @@ public class FileSimulation extends FileSolver {
             }
             //::-----------------------------------------------------------------
             //-------------------------- update properties -----  
-            solver.numberOfRun = numberOfRun;            
+            solver.numberOfRun = numberOfRun;
             //convert to array solver
             solver = new EAsolverArray(solver);
-            
+
             String solverFilename;
             if (perms.size() > 1) { // multiple solvers
                 solverFilename = simulFileName + "simulation_" + String.format("%0" + 3 + "d", i) + "." + FILE_EXTENSION;
@@ -151,8 +157,9 @@ public class FileSimulation extends FileSolver {
                 solverFilename = simulFileName + "." + FILE_EXTENSION;
                 solver.randomSeed = randomSeed; // random seed of the file
             }
+
             solver.report.setFileName(solverFilename);
-            
+
             if (!stop.isEmpty()) {
                 solver.stop = (StopCriteria) stop.get(0);
             }

@@ -2,7 +2,6 @@ package com.evolutionary.solver;
 
 import com.evolutionary.population.SimplePopulation;
 import com.evolutionary.problem.bits.OneMin;
-import com.evolutionary.solver.EAsolver;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

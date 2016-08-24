@@ -76,7 +76,7 @@ public class StatisticsChartSolver {
         ArrayList<AbstractStatistics> stats = solver.report.getStatistics();
 
         for (int i = 0; i < stats.size(); i++) {
-            JFreeChart chart = createChart(stats.get(i), solver.getSimpleName());
+            JFreeChart chart = createChart(stats.get(i), solver.solverName);
             formatChart(chart, 1);
             tabs.add(new ChartPanel(chart), chart.getXYPlot().getRangeAxis().getLabel());
         }

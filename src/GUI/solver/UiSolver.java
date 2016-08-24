@@ -17,7 +17,15 @@ public class UiSolver implements Runnable {
     EAsolver mySolver; // solver / array of solvers
     private int timeToSleep; // thread sleep
     Thread autorun = null; // thread
+    
+    public UiSolver(){   
+        mySolver = null;
+    }
 
+    public UiSolver(EAsolver mySolver) {
+        this.mySolver = mySolver;
+    }
+    
     public EAsolver getMySolver() {
         return mySolver;
     }

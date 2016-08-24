@@ -20,17 +20,18 @@
 //////////////////////////////////////////////////////////////////////////////
 package GUI.statistics;
 
+import com.evolutionary.problem.bits.HIFF;
 import com.evolutionary.report.statistics.AbstractStatistics;
-import com.evolutionary.report.statistics.FunctionCalls;
 import com.evolutionary.solver.EAsolver;
 import com.evolutionary.solver.MuGA;
+import com.evolutionary.solverUtils.EAsolverArray;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Stroke;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -51,59 +52,79 @@ import org.jfree.data.xy.XYSeriesCollection;
  *
  * @author zulu - computer
  */
-public class StatisticsChartSolver {
+public class StatisticsChartExperiment {
 
     /**
-     * TabedPane to all statistics
+     * TabedPane to all statisticsLines
      */
     JTabbedPane tabs = new JTabbedPane();
-    ArrayList statisticDataSet; // render to dataSet
 
-    public StatisticsChartSolver(EAsolver solver) {
-        setSolver(solver);
+    ArrayList<XYSeriesCollection> statisticDataSet; // render to dataSet
+
+    ArrayList<EAsolver> solvers; // solvers of experiment
+    ArrayList<String> solversLabel; // name of solvers ( labels of lines)
+
+    public StatisticsChartExperiment(ArrayList<EAsolver> AsolverArray) {
+        solversLabel = getSolverNames(AsolverArray);
+        setSolver(AsolverArray);
+    }
+
+    public ArrayList<String> getSolverNames(ArrayList<EAsolver> solverArray) {
+        ArrayList<String> lst = new ArrayList<>();
+        for (int i = 0; i < solverArray.size(); i++) {
+            for (int j = i + 1; j < solverArray.size(); j++) {
+                if (solverArray.get(i).solverName.equalsIgnoreCase(solverArray.get(j).solverName)) {
+                    solverArray.get(i).solverName += "_" + j;
+                }
+            }
+        }
+        for (int i = 0; i < solverArray.size(); i++) {
+            lst.add(solverArray.get(i).solverName);
+        }
+        return lst;
     }
 
     public JTabbedPane getTabs() {
         return tabs;
     }
 
-    public void setSolver(EAsolver solver) {
+    public void setSolver(ArrayList<EAsolver> solvers) {
+        this.solvers = solvers;
         //tabed pane
         tabs.removeAll();
         statisticDataSet = new ArrayList<>();
         //----------------------------------------------------------------------
-        //Conver statistics to GUI
-        ArrayList<AbstractStatistics> stats = solver.report.getStatistics();
-
+        //Convert statisticsLines to GUI
+        ArrayList<AbstractStatistics> stats = solvers.get(0).report.getStatistics();
         for (int i = 0; i < stats.size(); i++) {
-            JFreeChart chart = createChart(stats.get(i), solver.getSimpleName());
-            formatChart(chart, 1);
+            JFreeChart chart = createChart(stats.get(i));
+            formatChart(chart, solvers.size());
             tabs.add(new ChartPanel(chart), chart.getXYPlot().getRangeAxis().getLabel());
         }
-        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: insert data to chart
-        //update charts with values
-        ArrayList<Double[]> evolution = solver.report.evolution;
-        AbstractStatistics evals = new FunctionCalls();
-        for (int i = 0; i < evolution.size(); i++) {
-            updateStats(solver.report.getStatisticsData(i, evals), evolution.get(i));
-        }
+//        //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: insert data to chart
+//        //update charts with values
+//        ArrayList<Double[]> evolution = solver.report.evolution;
+//        AbstractStatistics evals = new FunctionCalls();
+//        for (int i = 0; i < evolution.size(); i++) {
+//            updateStats(solver.report.getStatisticsData(i, evals), evolution.get(i));
+//        }
         //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         tabs.revalidate();
     }
 
     public void updateStats(EAsolver solver) {
-        updateStats(solver.numEvaluations, solver.report.getLastValues());
+        updateStats(solvers.indexOf(solver), solver.numEvaluations, solver.report.getLastValues());
     }
 
-    public void updateStats(double numEvals, Double[] values) {
+    public void updateStats(int index, double numEvals, Double[] values) {
         for (int i = 0; i < values.length; i++) {
-            ((XYSeriesCollection) statisticDataSet.get(i)).getSeries(0).
+            statisticDataSet.get(i).getSeries(index).
                     add(numEvals, values[i]);
         }
 
     }
 
-    protected JFreeChart createChart(AbstractStatistics stat, String label) {
+    protected JFreeChart createChart(AbstractStatistics stat) {
         DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
 
         NumberAxis domain = new NumberAxis("Fitness Evaluations");
@@ -130,8 +151,12 @@ public class StatisticsChartSolver {
 
         chart.setNotify(true);
 
-        XYSeries data = new XYSeries(label);
-        dataset.addSeries(data);
+        for (int i = 0; i < solversLabel.size(); i++) {
+            XYSeries data = new XYSeries(solversLabel.get(i));
+            dataset.addSeries(data);
+        }
+        formatChart(chart, solversLabel.size());
+
         //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         statisticDataSet.add(dataset); // save render of statistic
         //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -167,9 +192,22 @@ public class StatisticsChartSolver {
     ///////////////////////////////////////////////////////////////////////////
 
     public static void main(String[] args) {
-        EAsolver solver = new MuGA();
-        solver.InitializeEvolution(true);
-        StatisticsChartSolver demo = new StatisticsChartSolver(solver);
+
+        ArrayList<EAsolver> exp = new ArrayList<>();
+        Random rnd = new Random();
+        for (int i = 0; i < 5; i++) {
+            EAsolver solver = new MuGA();
+            solver.randomSeed = rnd.nextLong();
+            solver.problem = new HIFF();
+            solver.numberOfRun = 20;
+            //solver.problem.setParameters((6 + i) + "");            
+            EAsolverArray s = new EAsolverArray(solver);
+            s.InitializeEvolution(false);
+            exp.add(s);
+
+        }
+
+        StatisticsChartExperiment demo = new StatisticsChartExperiment(exp);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -180,26 +218,28 @@ public class StatisticsChartSolver {
         frm.pack();
         frm.setLocationRelativeTo(null);
         frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frm.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frm.setVisible(true);
 
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    for (int i = 0; i < 100; i++) {
-                        solver.iterate();
-                        demo.updateStats(solver);
-                        frm.repaint();
-//                        Thread.sleep(200);
+        for (int i = 0; i < exp.size(); i++) {
+            final int numSolver = i;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        for (int i = 0; i < 500; i++) {
+                            exp.get(numSolver).iterate();
+                            demo.updateStats(exp.get(numSolver));
+                            frm.repaint();
+                        }
 
-                        //  JOptionPane.showMessageDialog(null, i+"");
+                    } catch (Exception ex) {
+                        Logger.getLogger(CharStatistics.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
-                } catch (Exception ex) {
-                    Logger.getLogger(CharStatistics.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            }).start();
 
-            }
-        });
+        }
 
     }
 }

@@ -46,7 +46,7 @@ public class ReportSimulation {
         for (int index = 0; index < solvers.size(); index++) {
             // ReportSolverArray report = (ReportSolverArray) solvers.get(index).report;
             double[] v = ((ReportSolverArray) solvers.get(index).report).getMeans();
-            txt.append("\n" + MyString.setSize(solvers.get(index).report.filename, ReportSolver.FIELD_SIZE));
+            txt.append("\n" + MyString.setSize(solvers.get(index).solverName, ReportSolver.FIELD_SIZE));
             for (int i = 0; i < v.length; i++) {
                 txt.append(" " + MyString.align(v[i], ReportSolver.FIELD_SIZE));
             }
@@ -60,7 +60,7 @@ public class ReportSimulation {
         for (int index = 0; index < solvers.size(); index++) {
             ReportSolverArray report = (ReportSolverArray) solvers.get(index).report;
             double[] v = ((ReportSolverArray) solvers.get(index).report).getSTDs();
-            txt.append("\n" + MyString.setSize(solvers.get(index).report.filename, ReportSolver.FIELD_SIZE));
+            txt.append("\n" + MyString.setSize(solvers.get(index).solverName, ReportSolver.FIELD_SIZE));
             for (int i = 0; i < v.length; i++) {
                 txt.append(" " + MyString.align(v[i], ReportSolver.FIELD_SIZE));
             }
@@ -98,7 +98,7 @@ public class ReportSimulation {
         //::::::::::::::::::::::: DATA ::::::::::::::::::::::::::
         for (int j = 0; j < solvers.size(); j++) {
             //name of simulation
-            txt.append(MyString.align(solvers.get(j).report.filename, ReportSolver.FIELD_SIZE));
+            txt.append(MyString.align(solvers.get(j).solverName, ReportSolver.FIELD_SIZE));
             //data
             double[] v = ((ReportSolverArray) solvers.get(j).report).getStatisticResult(indexStat);
             txt.append(" " + MyString.align(MyStatistics.mean(v), ReportSolver.FIELD_SIZE));
@@ -123,7 +123,7 @@ public class ReportSimulation {
                 //::::::: HEADER :::::::::::
                 txt.append(MyString.setSize(stats.get(indexStat).toString(), ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" "); // stat
                 for (int j = 0; j < solvers.size(); j++) { // name of solvers
-                    txt.append(MyString.align(solvers.get(j).report.filename, ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" ");
+                    txt.append(MyString.align(solvers.get(j).solverName, ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" ");
                 }
                 //::::: STATISTICS ::::::: MEAN :::::::
                 txt.append("\n" + MyString.align("Mean", ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" ");
@@ -193,7 +193,7 @@ public class ReportSimulation {
                 //::::::: HEADER :::::::::::
                 txt.append(MyString.setSize(stats.get(indexStat).toString(), ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" "); // stat
                 for (int j = 0; j < solvers.size(); j++) { // name of solvers
-                    txt.append(MyString.align(solvers.get(j).report.filename, ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" ");
+                    txt.append(MyString.align(solvers.get(j).solverName, ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" ");
                 }
                 //::::: STATISTICS ::::::: MEAN :::::::
                 txt.append("\n" + MyString.align("Mean", ReportSolver.FIELD_SIZE) + " " + SEPARATOR+" ");
@@ -260,7 +260,7 @@ public class ReportSimulation {
         //::::::: HEADER :::::::::::
         txt.append(MyString.setSize(stats.get(indexStat).toString(), ReportSolver.FIELD_SIZE) + " "); // stat
         for (int j = 0; j < solvers.size(); j++) { // name of solvers
-            txt.append(MyString.align(solvers.get(j).report.filename, ReportSolver.FIELD_SIZE) + " ");
+            txt.append(MyString.align(solvers.get(j).solverName, ReportSolver.FIELD_SIZE) + " ");
         }
         //::::: STATISTICS ::::::: MEAN :::::::
         txt.append("\n" + MyString.align("Mean", ReportSolver.FIELD_SIZE) + " ");
